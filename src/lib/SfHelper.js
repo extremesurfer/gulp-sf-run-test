@@ -94,7 +94,7 @@ class SfHelper{
                 });
 
                 if (isComplete) {
-                    console.log('isComplete');
+                    console.log('All test is finished.');
                     resolve();
                 } else {
                     return this.checkTestStatus(testRunId,resolve,reject);

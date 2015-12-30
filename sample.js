@@ -6,6 +6,25 @@ var _ = require('underscore');
 var helper = new ShHelper();
 var xmlHelper = new XMLHelper();
 
+function convertCsvFormat(arrayObj){
+    let csvStr = '';
+    let firstObj = arrayObj[0];
+
+    _.each(firstObj, (value, key)=>{
+        csvStr += `${key},`
+    });
+    csvStr += '\r\n';
+
+    _.each(arrayObj,(obj)=>{
+        _.each(obj, (value, key)=>{
+            csvStr += `${value},`
+        });
+        csvStr += '\r\n';
+    });
+
+    return csvStr;
+}
+
 helper.login()
 .then(function(){
     var readStream = fs.createReadStream('./package.xml');

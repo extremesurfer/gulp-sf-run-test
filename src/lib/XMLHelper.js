@@ -13,20 +13,11 @@ class XMLHelper{
     /**
      * * parsePackageXML
      * * parse package.xml
-     * * @param {Stream} fileStream Read Stream for package.xml
+     * * @param {String} str contents of package.xml
      * * @return {Promise} promise instance including array of apex classes
      **/
-    parsePackageXML(fileStream){
+    parsePackageXML(str){
         return new Promise((resolve,reject)=>{
-            let str = '';
-            fileStream.on('data', (chunk)=>{str += chunk;});
-            fileStream.on('end', ()=>{
-                resolve(str);
-            });
-            fileStream.on('error', (err)=>{
-                reject(err);
-            });
-        }).then((str)=>{
             return parseString(str);
         }).then((xmlObj)=>{
             var apexTypes = _.find(xmlObj.Package.types, (type)=>{return (type.name[0] === 'ApexClass')});
