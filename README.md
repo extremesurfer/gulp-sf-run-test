@@ -13,9 +13,9 @@ npm install gulp-sf-run-test --save-dev
 Create .env file that saves credential information of your Salesforce account:
 
 ```bash
-SFDC_HOST=your Salesforce host. https://ap2.salesforce.com, for example
-SFDC_USERNAME=your Salesforce username. satoshi.haga.github@gmail.com
-SFDC_PASSWORD=your Salesorce password
+SFDC_HOST=your Salesforce host. https://ap2.salesforce.com, for example.
+SFDC_USERNAME=your Salesforce username. satoshi.haga.github@gmail.com, for example.
+SFDC_PASSWORD=your Salesorce password.
 SFDC_TOKEN=your Salesforce security token if required.
 
 ```
