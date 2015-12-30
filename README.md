@@ -27,7 +27,7 @@ gulp.task('sf-test', function(){
 });
 ```
 
-Example of package.xml. Please make sure that both of production and test classes are needed to added.  
+Example of package.xml. Please make sure that both of production and test classes are needed.  
 
 ```xml
 
