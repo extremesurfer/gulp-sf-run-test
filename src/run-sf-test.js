@@ -12,7 +12,7 @@ var SfHelper = require('/lib/SfHelper');
 var XMLHelper = require('/lib/XMLHelper');
 
 
-var plugin = function(outputFileName)=>{
+var plugin = function(outputFileName){
 
 
     function transform(file, encoding, callback) {
