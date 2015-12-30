@@ -6,13 +6,13 @@
 var gulp = require('gulp');
 var babel = require('gulp-babel');
 
-var sfTest = require('./build/run-sf-test');
+var sfTest = require('./run-sf-test');
 
 
 gulp.task('babel', function(){
     return gulp.src('src/**/*.js')
         .pipe(babel())
-        .pipe(gulp.dest('./build/'));
+        .pipe(gulp.dest('./'));
 });
 
 gulp.task('sf-test', function(){
