@@ -10,6 +10,16 @@ First install `gulp-sf-run-test` as a development dependency:
 npm install gulp-sf-run-test --save-dev
 ```
 
+Create .env file that saves credential information of your Salesforce account:
+
+```bash
+SFDC_HOST=your Salesforce host. https://ap2.salesforce.com, for example
+SFDC_USERNAME=your Salesforce username. satoshi.haga.github@gmail.com
+SFDC_PASSWORD=your Salesorce password
+SFDC_TOKEN=your Salesforce security token if required.
+
+```
+
 Then, add it to your gulpfile.js:
 
 ```javascript
@@ -27,7 +37,7 @@ gulp.task('sf-test', function(){
 });
 ```
 
-Example of package.xml. Please make sure that both of production and test classes are needed.  
+Example of package.xml. Please make sure that both of production and test classes are needed:
 
 ```xml
 
@@ -44,7 +54,7 @@ Example of package.xml. Please make sure that both of production and test classe
 </Package>
 ```
 
-Example of test result. 
+Example of test result:
 
 ```csv
 className,coveredRate,
