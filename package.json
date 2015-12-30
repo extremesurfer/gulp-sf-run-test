@@ -1,0 +1,30 @@
+{
+  "name": "gulp-sf-run-test",
+  "version": "0.0.1",
+  "description": "gulp plugin for running test-code on salesforce",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:hagasatoshi/gulp-sf-run-test.git"
+  },
+  "author": "Satoshi Haga (shaga@pasonatquila.com)",
+  "license": "ISC",
+  "devDependencies": {
+    "babel": "5.8.23",
+    "fs-extra": "0.24.0",
+    "gulp": "3.9.0",
+    "gulp-babel": "5.2.1"
+  },
+  "dependencies": {
+    "dotenv": "^1.2.0",
+    "fs": "0.0.2",
+    "jsforce": "^1.5.0",
+    "lodash": "^3.10.1",
+    "q": "^1.4.1",
+    "restler": "^3.4.0",
+    "underscore": "^1.8.3"
+  }
+}
