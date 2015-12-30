@@ -1,6 +1,6 @@
 {
   "name": "gulp-sf-run-test",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "gulp plugin for running apex-tests on salesforce",
   "main": "run-sf-test.js",
   "scripts": {
