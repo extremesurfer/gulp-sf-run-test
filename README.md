@@ -43,3 +43,11 @@ Example of package.xml. Please make sure that both of production and test classe
     <version>34.0</version>
 </Package>
 ```
+
+Example of test result. 
+
+```csv
+className,coveredRate,
+XXXXXX,52,
+YYYYYY,43,
+```
