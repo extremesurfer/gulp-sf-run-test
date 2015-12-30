@@ -6,9 +6,9 @@
 
 var Promise = require('bluebird');
 var jsforce = require('jsforce');
-var restler = require('restler');
 var _ = require('underscore');
 require('dotenv').load();
+var sleep = require('sleep');
 
 
 class SfHelper{
@@ -19,6 +19,7 @@ class SfHelper{
      * * @return {Promise}
      **/
     login(){
+        this.count = 0;
         this.connection = new jsforce.Connection({loginUrl : process.env.SFDC_HOST});
 
         return Promise.resolve()
@@ -77,13 +78,14 @@ class SfHelper{
      * * @private
      **/
     checkTestStatus(testRunId, _resolve, _reject){
-        console.log('Waiting.....');
+        console.log(`Waiting until all test is finished ${this.count++}s.....`);
+
         return new Promise((resolve,reject)=>{
             if(_resolve && _reject){
                 resolve = _resolve;
                 reject = _reject;
             }
-
+            sleep.sleep(1);
             return this.connection.query(`select Id, Status, ApexClassId from ApexTestQueueItem where ParentJobId = '${testRunId}'`)
             .then((data)=>{
                 let isComplete = true;
@@ -145,7 +147,6 @@ class SfHelper{
                 targetClass.coveredRate = targetClass.allLineCount === 0 ? 0 : Math.floor((targetClass.coveredLineCount / targetClass.allLineCount) * 100);
             });
 
-            console.log(targetClasses);
             return targetClasses;
         });
     }

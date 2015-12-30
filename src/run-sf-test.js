@@ -8,100 +8,70 @@
 var gutil = require('gulp-util');
 var through = require('through2');
 var _ = require('underscore');
-require('./lib/underscore-mixin');
-
+require('./lib/undersocre-mixin');
+var Promise = require('bluebird');
 var SfHelper = require('./lib/SfHelper');
 var XMLHelper = require('./lib/XMLHelper');
+require('date-utils');
 
-var plugin = function(outputFileName){
 
-    var packageXml;
+module.exports = function(outputFileName) {
+    return through.obj(function(file, enc, callback) {
+        var self = this;
 
-    /** implementation of 'transform' */
-    function transform(file, encoding, callback) {
-
-        //file is not specified.
-        if(file.isNull()) {
-            this.push(file);
-            return callback();
+        if (file.isStream()) {
+            return self.emit('error', new PluginError(PLUGIN_NAME, 'Streaming not supported'));
         }
 
-        //streaming in not supported.
-        if(file.isStream()) {
-            this.emit('error', new gutil.PluginError('gulp-run-sf-test', 'Streaming not supported'));
-            return callback();
-        }
+        if (file.isBuffer()) {
+            var sfHelper = new SfHelper();
+            var xmlHelper = new XMLHelper();
 
-        //file is saved.
-        if(!packageXml){
-            packageXml = file;
-        }else{
-            //only 1 file is supported.
-            this.emit('error', new gutil.PluginError('gulp-run-sf-test', 'only 1 file is supported.'));
-        }
+            //start main logic
+            return Promise.props({
+                result: sfHelper.login(),   //Login to Salesforce
+                apexClassNames: xmlHelper.parsePackageXML(file.contents.toString('utf8')) //parse package.xml
+            }).then(({result, apexClassNames})=> {
 
-        callback();
-    }
+                //retrieve apex information from Salesforce
+                return sfHelper.retrieveApexClasses(apexClassNames);
+            }).then(()=> {
 
-    /** implementation of 'flush' */
-    function flush(callback) {
-        if(!packageXml){
-            this.emit('error', new gutil.PluginError('gulp-run-sf-test', 'package.xml is not specified correctly.'));
-        }
+                //submit test job including previous apex test-classes
+                return sfHelper.submitTestJob();
+            }).then((testRunId)=> {
 
-        var sfHelper = new ShHelper();
-        var xmlHelper = new XMLHelper();
+                //wait until all test job is finished
+                return sfHelper.checkTestStatus(testRunId);
+            }).then(()=> {
 
-        //start main logic
-        Promise.props({
-            result: sfHelper.login(),   //Login to Salesforce
-            apexClassNames: xmlHelper.parsePackageXML(packageXml.contents.toString('utf8')) //parse package.xml
-        }).then(({result, apexClassNames})=>{
+                //retrieve and summarize the test coverages.
+                return sfHelper.summarizeCoverages();
+            }).then((allCoverages)=> {
 
-            //retrieve apex information from Salesforce
-            return sfHelper.retrieveApexClasses(apexClassNames);
+                //filter result data.
+                let result = _.map(allCoverages, (e)=> {
+                    return {className: e.className, coveredRate: e.coveredRate}
+                });
+                //convert as csv-format
+                let csvResult = _.formatAsCsv(result);
 
-        }).then(()=>{
+                //output to gulp.dest
+                var output = new gutil.File({
+                    cwd:  file.cwd,
+                    base: file.base,
+                    path: `${file.base}result-${new Date().toFormat('YYYYMMDDHH24MISS')}.csv`
+                });
+                output.contents = new Buffer(csvResult);
 
-            //submit test job including previous apex test-classes
-            return sfHelper.submitTestJob();
-
-        }).then((testRunId)=>{
-
-            //wait until all test job is finished
-            return sfHelper.checkTestStatus(testRunId);
-
-        }).then(()=>{
-
-            //retrieve and summarize the test coverages.
-            return sfHelper.summarizeCoverages();
-
-        }).then((allCoverages)=>{
-
-            //filter result data.
-            let result = _.map(allCoverages, (e)=>{return {className:e.className, coveredRate: e.coveredRate}});
-            //convert as csv-format
-            let csvResult = _.formatAsCsv(result);
-
-            //create output file information
-            let output = new gutil.File({
-                cwd: packageXml.cwd,
-                base: packageXml.base,
-                path: packageXml.base + outputFileName
+                self.push(output);
+                callback();
+            }).catch((err)=> {
+                console.log('Error!!');
+                console.log(err);
             });
-            output.contents = new Buffer(csvResult);
+        }
 
-            this.push(output);
-            callback();
+    });
 
-        }).catch((err)=>{
-            console.log('Error!!');
-            console.log(err);
-        });
-
-    }
-
-    return through.obj(transform, flush);
 };
-
-module.exports = plugin;

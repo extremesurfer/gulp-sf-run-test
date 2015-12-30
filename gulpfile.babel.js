@@ -6,10 +6,20 @@
 var gulp = require('gulp');
 var babel = require('gulp-babel');
 
+var sfTest = require('./build/run-sf-test');
+
+
 gulp.task('babel', function(){
     return gulp.src('src/**/*.js')
         .pipe(babel())
         .pipe(gulp.dest('./build/'));
 });
+
+gulp.task('sf-test', function(){
+    return gulp.src('./src/package.xml')
+        .pipe(sfTest())
+        .pipe(gulp.dest('./result/'));
+});
+
 
 gulp.task('default', ['babel']);
