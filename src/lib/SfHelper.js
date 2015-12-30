@@ -13,10 +13,6 @@ require('dotenv').load();
 
 class SfHelper{
 
-    //jsforce.Connection
-    //productionClasses
-    //testClasses
-
     /**
      * * login
      * * login to Salesforce
@@ -43,7 +39,7 @@ class SfHelper{
         let productionClasses = [];
         let testClasses = [];
         return this.connection.tooling.sobject('ApexClass').find({
-            Name:['XXXXX','YYYYY', 'ZZZZZ', 'WWWWWW']
+            Name: apexClassNames
         }).execute()
         .then((apexClasses)=>{
             _.each(apexClasses, (apexClass)=>{
@@ -131,7 +127,9 @@ class SfHelper{
                 if(!targetClass) return;
 
                 _.each(coverage.Coverage.uncoveredLines, (uncoveredLineNumber)=>{
-                    targetClass.sourceLines[uncoveredLineNumber] = 'uncovered';
+                    if(targetClass.sourceLines[uncoveredLineNumber] !== 'covered'){
+                        targetClass.sourceLines[uncoveredLineNumber] = 'uncovered';
+                    }
                 });
                 _.each(coverage.Coverage.coveredLines, (coveredLineNumber)=>{
                     targetClass.sourceLines[coveredLineNumber] = 'covered';
