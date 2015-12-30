@@ -43,20 +43,20 @@ class SfHelper{
         let productionClasses = [];
         let testClasses = [];
         return this.connection.tooling.sobject('ApexClass').find({
-            Name:['	XXXXXX','XXXXXTest']
+            Name:['XXXXX','YYYYY', 'ZZZZZ', 'WWWWWW']
         }).execute()
         .then((apexClasses)=>{
             _.each(apexClasses, (apexClass)=>{
                 if (apexClass.Body.indexOf('@isTest') === -1) {
                     productionClasses.push({
                         Id: apexClass.Id,
-                        name: apexClass.FullName,
+                        fullName: apexClass.FullName,
                         coverage: []
                     });
                 } else {
                     testClasses.push({
                         Id: apexClass.Id,
-                        name: apexClass.FullName
+                        fullName: apexClass.FullName
                     });
                 }
             });
@@ -80,11 +80,13 @@ class SfHelper{
      * * @return {Promise}
      * * @private
      **/
-    _checkTestStatus(testRunId,promiseResolve,promiseReject){
+    checkTestStatus(testRunId, _resolve, _reject){
         console.log('Waiting.....');
         return new Promise((resolve,reject)=>{
-            if(promiseResolve) resolve = promiseResolve;
-            if(promiseReject) reject = promiseReject;
+            if(_resolve && _reject){
+                resolve = _resolve;
+                reject = _reject;
+            }
 
             return this.connection.query(`select Id, Status, ApexClassId from ApexTestQueueItem where ParentJobId = '${testRunId}'`)
             .then((data)=>{
@@ -99,9 +101,10 @@ class SfHelper{
                     console.log('isComplete');
                     resolve();
                 } else {
-                    return this._checkTestStatus(testRunId,resolve,reject);
+                    return this.checkTestStatus(testRunId,resolve,reject);
                 }
-
+            }).fail((err)=>{
+                reject(err);
             });
         });
     }
@@ -111,7 +114,42 @@ class SfHelper{
      * * @return {Array}
      **/
     summarizeCoverages(){
+        return this.connection.tooling.sobject('ApexCodeCoverage').find({})
+        .then((coverages)=>{
+            let targetClasses = _.map(this.productionClasses, (apex)=>{
+                return {
+                    Id: apex.Id,
+                    className: apex.fullName,
+                    uncoveredLineCount:0,
+                    coveredLineCount:0,
+                    sourceLines:{}
+                }
+            });
 
+            _.each(coverages, (coverage)=>{
+                let targetClass = _.find(targetClasses, (apex)=>{ return (apex.Id === coverage.ApexClassOrTriggerId);});
+                if(!targetClass) return;
+
+                _.each(coverage.Coverage.uncoveredLines, (uncoveredLineNumber)=>{
+                    targetClass.sourceLines[uncoveredLineNumber] = 'uncovered';
+                });
+                _.each(coverage.Coverage.coveredLines, (coveredLineNumber)=>{
+                    targetClass.sourceLines[coveredLineNumber] = 'covered';
+                });
+            });
+
+            _.each(targetClasses, (targetClass)=>{
+                let classCoverageCountBy = _.countBy(targetClass.sourceLines, (value)=>{return value;});
+
+                targetClass.uncoveredLineCount = classCoverageCountBy['uncovered'] ? classCoverageCountBy['uncovered'] : 0 ;
+                targetClass.coveredLineCount = classCoverageCountBy['covered'] ? classCoverageCountBy['covered'] : 0 ;
+                targetClass.allLineCount = targetClass.uncoveredLineCount + targetClass.coveredLineCount;
+                targetClass.coveredRate = targetClass.allLineCount === 0 ? 0 : Math.floor((targetClass.coveredLineCount / targetClass.allLineCount) * 100);
+            });
+
+            console.log(targetClasses);
+            return targetClasses;
+        });
     }
 }
 
