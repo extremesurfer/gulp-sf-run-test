@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git@github.com:hagasatoshi/gulp-sf-run-test.git"
   },
-  "author": "Satoshi Haga (shaga@pasonatquila.com)",
+  "author": "Satoshi Haga (satoshi.haga.github@gmail.com)",
   "license": "ISC",
   "devDependencies": {
     "babel": "5.8.23",
